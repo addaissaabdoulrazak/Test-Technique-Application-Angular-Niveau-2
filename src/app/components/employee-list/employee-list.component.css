@@ -1,0 +1,14 @@
+
+  .loading-spinner {
+    position: absolute; /* Positionnement absolu */
+    top: 50%; /* Centre verticalement */
+    left: 50%; /* Centre horizontalement */
+    transform: translate(-50%, -50%); /* Ajustement pour centrer parfaitement */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Assurez-vous qu'il est au-dessus des autres éléments */
+}
