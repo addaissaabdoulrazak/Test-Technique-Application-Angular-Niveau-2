@@ -127,10 +127,10 @@ export class EmployeeListComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   
-    // Simule un délai pour montrer le spinner, tu peux le remplacer par des appels API ou d'autres opérations
+   
     setTimeout(() => {
-      this.isLoading = false;  // Désactive le spinner après traitement
-    }, 500);  // Ajuste le délai selon tes besoins
+      this.isLoading = false;  
+    }, 500);  
   }
 
   deleteEmployee(id: number) {
