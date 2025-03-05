@@ -1,43 +1,34 @@
 <div class="container" fxLayout="column" fxLayoutGap="20px">
     <div class="d-flex justify-content-between align-items-center my-5">
         <!-- Bouton Bootstrap bleu -->
-        <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+        <!-- <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
             {{ showAddForm ? 'Annuler' : 'Ajouter Employé' }}
-        </button>
-    
-        <!-- Champ de recherche Bootstrap -->
-        <div class="input-group w-50">
-            <input type="text" class="form-control" placeholder="Rechercher..." (keyup)="applyFilter($event)">
+        </button> -->
+        <button (click)="showAddForm = true" mat-raised-button class="btn btn-primary">
+            
+            Ajouter Employé
+          </button>
+        <!-- Champ de recherche -->
+        <div class="position-relative w-50">
+            <input 
+                type="text" 
+                class="form-control pe-4" 
+                placeholder="Rechercher..." 
+                (input)="applyFilter($event)"
+            >
+            <span 
+                class="position-absolute top-50 end-0 translate-middle-y me-2" 
+                *ngIf="isLoading"
+            >
+                <div class="spinner-border text-primary spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </span>
         </div>
     </div>
 
-    <!-- Formulaire d'ajout d'un employé -->
-    <form *ngIf="showAddForm" (submit)="addEmployee()" #employeeForm="ngForm" fxLayout="column" fxLayoutGap="10px">
-        <mat-form-field>
-            <input matInput placeholder="Prénom" [(ngModel)]="newEmployee.firstName" name="firstName" required>
-        </mat-form-field>
-
-        <mat-form-field>
-            <input matInput placeholder="Nom" [(ngModel)]="newEmployee.lastName" name="lastName" required>
-        </mat-form-field>
-
-        <mat-form-field>
-            <input matInput placeholder="Email" [(ngModel)]="newEmployee.email" name="email" type="email" required>
-        </mat-form-field>
-
-        <mat-form-field>
-            <input matInput placeholder="Âge" [(ngModel)]="newEmployee.age" name="age" type="number" required>
-        </mat-form-field>
-
-        <mat-form-field>
-            <input matInput placeholder="Salaire" [(ngModel)]="newEmployee.salary" name="salary" type="number" required>
-        </mat-form-field>
-
-        <button class="btn btn-success ms-5" type="submit">Valider</button>
-    </form>
-
 <div class="table-container" style="position: relative;"> 
-    <!-- Indicateur de chargement (spinner) -->
+
     <div *ngIf="loading" class="loading-spinner" >
         <mat-spinner diameter="50"></mat-spinner> <!-- Spinner Angular Material -->
         <p>Chargement...</p>
@@ -45,7 +36,7 @@
 
 
     <!-- Tableau des employés -->
-    <div class="mat-elevation-z8">
+    <div class="mat-elevation-z8 data-table">
         <table mat-table [dataSource]="dataSource" matSort class="mat-table">
             
             <!-- ID -->
@@ -88,14 +79,24 @@
             <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef> Actions </th>
                 <td mat-cell *matCellDef="let element">
-                    <button mat-icon-button color="warn" (click)="deleteEmployee(element.id)" style="color: red;">
+                    <!-- <button class="btn btn-warning btn-sm me-2" (click)="openEmployeeDialog(element)">
+                        <mat-icon>edit</mat-icon>
+                    </button> -->
+                    <button class="btn btn-danger btn-sm" (click)="deleteEmployee(element.id)" >
                         <mat-icon>delete</mat-icon>
+                        <!-- <i class="bi bi-trash"></i> -->
                     </button>
                 </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+             <!-- Affichage si aucun employé trouvé -->
+             <!-- <tr *ngIf="dataSource.data.length === 0">
+                <td [attr.colspan]="displayedColumns.length" class="text-center">
+                    Aucun employé trouvé.
+                </td>
+            </tr> -->
         </table>
 
         <!-- Pagination -->
@@ -103,9 +104,67 @@
         [length]="length" 
         [pageSize]="pageSize" 
         [pageSizeOptions]="pageSizeOptions"
-        > 
-        <!-- (page)="onPageChange($event)" -->
-</mat-paginator>
+        [showFirstLastButtons]="true">
+       </mat-paginator>
     </div>
 </div>
+
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" 
+     [class.show]="showAddForm" 
+     [style.display]="showAddForm ? 'block' : 'none'"
+     id="addEmployeeModal" 
+     tabindex="-1"
+     (keydown.escape)="closeModal()">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      
+      <form (ngSubmit)="addEmployee()" #employeeForm="ngForm">
+        
+        <div class="modal-header">
+          <h5 class="modal-title">Ajouter un employé</h5>
+          <button type="button" 
+                  class="btn-close" 
+                  (click)="closeModal()"
+                  aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="mb-3">
+              <label for="firstName" class="form-label">Prénom</label>
+              <input type="text" class="form-control" id="firstName" [(ngModel)]="newEmployee.firstName" name="firstName" required>
+            </div>
+            <div class="mb-3">
+              <label for="lastName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="lastName" [(ngModel)]="newEmployee.lastName" name="lastName" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" [(ngModel)]="newEmployee.email" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="age" class="form-label">Âge</label>
+              <input type="number" class="form-control" id="age" [(ngModel)]="newEmployee.age" name="age" required>
+            </div>
+            <div class="mb-3">
+              <label for="salary" class="form-label">Salaire (€)</label>
+              <input type="number" class="form-control" id="salary" [(ngModel)]="newEmployee.salary" name="salary" required>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form> 
+    </div>
+  </div>
 </div>
+
+<!-- Backdrop dynamique -->
+<div class="modal-backdrop fade show" *ngIf="showAddForm"></div>
+
+
+</div>
+
